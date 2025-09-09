@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tres en Raya Online</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Pantalla de Autenticación -->
+  <div id="auth-container">
+    <h1>🎮 Tres en Raya</h1>
+
+    <!-- Formulario de Registro -->
+    <div id="register-form" class="form">
+      <h2>Crear Cuenta</h2>
+      <input type="text" id="reg-name" placeholder="Nombre Completo" required />
+      <input type="email" id="reg-email" placeholder="Correo Electrónico" required />
+      <input type="password" id="reg-password" placeholder="Contraseña" required />
+      <button onclick="register()">Registrarse</button>
+      <p>¿Ya tienes cuenta? <a href="#" onclick="showRegisterForm(false)">Inicia sesión</a></p>
+    </div>
+
+    <!-- Formulario de Inicio de Sesión -->
+    <div id="login-form" class="form hidden">
+      <h2>Iniciar Sesión</h2>
+      <input type="email" id="login-username" placeholder="Correo Electrónico" required />
+      <input type="password" id="login-password" placeholder="Contraseña" required />
+      <button onclick="login()">Iniciar Sesión</button>
+      <p>¿No tienes cuenta? <a href="#" onclick="showRegisterForm(true)">Regístrate</a></p>
+    </div>
+  </div>
+
+  <!-- Tablero del Juego -->
+  <div id="game-container" class="hidden">
+    <h2>¡Tres en Raya! <span id="player-turn">Turno: Jugador X</span></h2>
+    
+    <!-- 🔘 NUEVOS BOTONES DE MODO -->
+    <div id="mode-selector" style="margin: 15px 0; text-align: center;">
+      <button id="mode-ai" class="mode-btn">🤖 Jugar contra IA</button>
+      <button id="mode-online" class="mode-btn">🌐 Jugar Online</button>
+    </div>
+
+    <!-- 🎲 BOTÓN NUEVO: Jugar contra jugador aleatorio -->
+    <button id="play-random-btn" class="mode-btn">🎲 Jugar contra Jugador Aleatorio</button>
+
+    <div id="board">
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+    </div>
+    <button id="restart-button">Reiniciar Juego</button>
+    <button onclick="logout()">Cerrar Sesión</button>
+  </div>
+
+  <!-- 🔊 BOTÓN DE SONIDO (siempre visible) -->
+  <button id="toggle-sound-btn" class="toggle-sound-btn">
+    🔊 
+  </button>
+
+  <!-- Firebase SDK (solo configuración y autenticación) -->
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // 🔥 Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCy4nDODVtyXDMUACDnJVNAxhCpUvaG9HU",
+      authDomain: "proyecto-login-3aff4.firebaseapp.com",
+      projectId: "proyecto-login-3aff4",
+      storageBucket: "proyecto-login-3aff4.firebasestorage.app",
+      messagingSenderId: "598988620316",
+      appId: "1:598988620316:web:b6873b2cb28a2f232ed5d9"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Hacer accesible para script.js
+    window.auth = auth;
+    window.db = db;
+    window.currentUser = null;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+
+    // Función: Mostrar formulario
+    function showRegisterForm(show) {
+      document.getElementById("register-form").classList.toggle("hidden", !show);
+      document.getElementById("login-form").classList.toggle("hidden", show);
+    }
+    window.showRegisterForm = showRegisterForm;
+
+    // Función: Registrar usuario
+    window.register = () => {
+      const name = document.getElementById("reg-name").value.trim();
+      const email = document.getElementById("reg-email").value;
+      const password = document.getElementById("reg-password").value;
+
+      if (!name || !email || !password) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+      if (password.length < 6) {
+        alert("La contraseña debe tener al menos 6 caracteres.");
+        return;
+      }
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential) => {
+          const user = userCredential.user;
+          // Guardar usuario en Firestore
+          await setDoc(doc(db, "users", user.uid), {
+            name: name,
+            email: email,
+            wins: 0,
+            losses: 0,
+            draws: 0
+          });
+          alert(`¡Registro exitoso! Bienvenido, ${name}`);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          if (errorCode === "auth/email-already-in-use") {
+            alert("Este correo ya está registrado.");
+          } else if (errorCode === "auth/invalid-email") {
+            alert("El correo no es válido.");
+          } else if (errorCode === "auth/weak-password") {
+            alert("Contraseña muy débil. Usa al menos 6 caracteres.");
+          } else {
+            alert("Error: " + error.message);
+          }
+        });
+    };
+
+    // Función: Iniciar sesión
+    window.login = () => {
+      const email = document.getElementById("login-username").value;
+      const password = document.getElementById("login-password").value;
+
+      if (!email || !password) {
+        alert("Por favor, ingresa correo y contraseña.");
+        return;
+      }
+
+      signInWithEmailAndPassword(auth, email, password)
+        .catch((error) => {
+          const errorCode = error.code;
+          if (errorCode === "auth/user-not-found") {
+            alert("No existe un usuario con este correo.");
+          } else if (errorCode === "auth/wrong-password") {
+            alert("Contraseña incorrecta.");
+          } else if (errorCode === "auth/invalid-email") {
+            alert("El formato del correo no es válido.");
+          } else {
+            alert("Error: " + error.message);
+          }
+        });
+    };
+
+    // Función: Cerrar sesión
+    window.logout = () => {
+      signOut(auth).then(() => {
+        alert("Sesión cerrada");
+      });
+    };
+
+    // Escuchar cambios de autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.currentUser = user;
+        document.getElementById("auth-container").classList.add("hidden");
+        document.getElementById("game-container").classList.remove("hidden");
+        if (typeof startGame === "function") {
+          startGame();
+        }
+      } else {
+        window.currentUser = null;
+        document.getElementById("game-container").classList.add("hidden");
+        document.getElementById("auth-container").classList.remove("hidden");
+      }
+    });
+  </script>
+
+  <!-- Lógica del juego -->
+  <script src="script.js"></script>
+</body>
+</html>

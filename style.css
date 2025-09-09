@@ -1,0 +1,204 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-image: url('img/fondo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.hidden {
+  display: none;
+}
+
+.form, #game-container {
+  background-color: rgba(255, 255, 255, 0.92);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 420px;
+  margin: 40px auto;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form h2, #game-container h2 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 0px;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 20px 0;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background: white;
+  border: 3px solid #34495e;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cell:hover {
+  background-color: #ecf0f1;
+  transform: scale(1.05);
+}
+
+#restart-button {
+  background-color: #27ae60;
+}
+
+#restart-button:hover {
+  background-color: #219950;
+}
+
+/* --- Estilos para botones de modo --- */
+.mode-btn {
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  margin: 0 5px;
+  transition: all 0.3s;
+  min-width: 140px;
+}
+
+.mode-btn:hover {
+  background-color: #8e44ad;
+  transform: translateY(-2px);
+}
+
+.mode-btn.active {
+  background-color: #27ae60;
+  box-shadow: 0 0 10px rgba(39, 174, 96, 0.6);
+}
+
+/* --- Estilo para mensaje de espera --- */
+#waiting-message {
+  text-align: center;
+  font-weight: bold;
+  color: #e67e22;
+  margin: 15px 0;
+  font-size: 18px;
+}
+
+#player-turn {
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#player-turn:empty {
+  opacity: 0;
+}
+
+#player-turn {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* --- Estilo para el botón "Jugar contra Jugador Aleatorio" --- */
+#play-random-btn {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  margin: 10px auto 15px auto;
+  display: block;
+  transition: all 0.3s;
+  min-width: 220px;
+  font-weight: bold;
+}
+
+#play-random-btn:hover {
+  background-color: #e67e22;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(230, 126, 34, 0.3);
+}
+
+/* 🔊 Ícono de sonido flotante (solo emoji, sin estilo) */
+.sound-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s ease;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+  outline: none !important; /* ✅ Elimina el borde celeste al hacer clic */
+}
+
+.sound-icon:hover {
+  transform: scale(1.1);
+}
+
+.sound-icon.playing {
+  color: #e74c3c;
+}
